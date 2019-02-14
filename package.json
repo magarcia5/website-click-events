@@ -1,0 +1,28 @@
+{
+  "name": "seva-click-events",
+  "version": "1.0.0",
+  "description": "Web application that displays click events on a website per page per day",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify src/index.js > bundle.js",
+    "watch": "watchify src/index.js -o bundle.js -v",
+    "run": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magarcia5/seva-click-events.git"
+  },
+  "author": "Mel Alrajhi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/magarcia5/seva-click-events/issues"
+  },
+  "homepage": "https://github.com/magarcia5/seva-click-events#readme",
+  "dependencies": {
+    "browserify": "^16.2.3",
+    "chart.js": "^2.7.3",
+    "express": "^4.16.4",
+    "watchify": "^3.11.0"
+  }
+}
