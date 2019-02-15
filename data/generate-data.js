@@ -8,15 +8,7 @@
  */
 
 const { Client } = require('pg');
-
-const CONNECTION_PARAMETERS = {
-  user: "doadmin",
-  password: "dw28t2fj31o21yba",
-  database: "defaultdb",
-  port: 25060,
-  host: "mels-db-postgresql-nyc1-do-user-4808586-0.db.ondigitalocean.com",
-  ssl: true
-};
+const { CONNECTION_PARAMETERS } = require('../config/conf_db');
 
  // Test data values. These just give you an idea of the types of events
  // and is by no means exhaustive.
@@ -54,12 +46,10 @@ const now = new Date();
 let oneDayAgo = new Date(now).setDate(now.getDate() - 1);
 oneDayAgo = new Date(oneDayAgo);
 
-//`INSERT INTO 
-//   test_table (time, page, event)  
-//   VALUES (\'02-15-2019 10:23:00\', \'home_page'\, \'learn_more_link\'),
-//          (\'02-15-2019 8:23:00\', \'sign_up_page'\, \'submit_form_button\'),
-//          (\'02-15-2019 9:13:00\', \'home_page'\, \'learn_more_link\')`;
-let q = 'INSERT INTO test_table (time, page, event) VALUES ';
+let q = `
+  DROP TABLE test_table; 
+  CREATE TABLE test_table (time timestamp not null, page text not null, event text not null); 
+  INSERT INTO test_table (time, page, event) VALUES `;
 
 PAGE_EVENTS.forEach(page => {
   const events = page.events;
@@ -76,7 +66,7 @@ q = q.concat(';');
 
 client.query(q, (err, res) => {
   if (err) console.log(err);
-  console.log(res)
+  console.log("Your data has been created.");
   client.end()
 });
 
