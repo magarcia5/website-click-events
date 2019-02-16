@@ -76,6 +76,6 @@ function randomDate(start, end, startHour, endHour) {
   date.setHours(hour);
   
   // format for postgres db i.e. 2019-02-15 20:35:15
-  return date.toISOString().replace(/T/, ' ').replace(/\..+/, '');;
+  return date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
 }
 
