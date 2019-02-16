@@ -14,6 +14,10 @@ app.get('/', (req, res) => {
 
 app.get('/pages', (req, res) => getPages(res));
 
+app.get('/click-data', (req, res) => {
+  return retrieveClickData(req.query.page, res);
+})
+
 http.listen(3000, () => {
   console.log('Visit the UI at http://localhost:3000');
 });
@@ -29,13 +33,6 @@ client.connect((err) => {
   }
 });
 
-/**
- * select event, count(*) as ct from 
- *  (select * from 
- *    (select * from test_table where time between '02-15-2019 8:00:00' and '02-15-2019 9:00:00') 
- *  as timerange where page='home_page') 
- * as events group by 1;
- */
 const getPagesQuery = 'SELECT DISTINCT page FROM test_table;';
 
 let now = new Date();
@@ -55,14 +52,18 @@ function getPages(resp) {
     }
   });
 }
-retrieveClickData();
-function retrieveClickData() {
-  const query = getClicksPerHour('faq_page');
+
+function retrieveClickData(page, resp) {
+  const results = [];
+  const { times, query } = getClicksPerHour(page);
   client.query(query, (err, res) => {
     if (err) {
       console.log(err);
     } else {
-      console.log(res);
+      times.forEach((time, index) => {
+        results.push({ time, results: res[index].rows });
+      });
+      resp.send(results);
     }
   });
 }
@@ -70,9 +71,10 @@ function retrieveClickData() {
 function getClicksPerHour(page) {
   let query = '';
   let currTime = oneDayAgo;
-  console.log('QUERY FOR PAGE: ' + page);
+  let times = [];
 
   while (currTime < now) {
+    times.push(currTime);
     let oneHourLater =  addHour(new Date(currTime));
     query = query.concat(`
       SELECT event, COUNT(*) AS count FROM
@@ -84,7 +86,7 @@ function getClicksPerHour(page) {
     currTime = oneHourLater;
   }
 
-  return query;
+  return { times, query };
 }
 
 function addHour(currTime) {
