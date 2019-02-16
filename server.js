@@ -12,6 +12,8 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+app.get('/pages', (req, res) => getPages(res));
+
 http.listen(3000, () => {
   console.log('Visit the UI at http://localhost:3000');
 });
@@ -41,31 +43,28 @@ now = new Date(now.setMinutes(00,00));
 let oneDayAgo = new Date(now).setDate(now.getDate() - 1);
 oneDayAgo = new Date(oneDayAgo);
 
-retrieveClickData();
-function retrieveClickData() {
+function getPages(resp) {
   client.query(getPagesQuery, (err, res) => {
     if (err) {
+      // do some error stuff
       console.log(err);
     } else {
-      let q = getClicksForPages(res.rows);
-      client.query(q, (err, res) => {
-        if (err) {
-          // do some error stuff
-        } else {
-          res.forEach(r => console.log(r));
-        }
-        client.end();
-      });
+      let pages = [];
+      res.rows.forEach(row => pages.push(row.page));
+      resp.send(pages);
     }
   });
 }
-
-function getClicksForPages(rows) {
-  let query = '';
-  rows.forEach(row => {
-    query = query.concat(getClicksPerHour(row.page));
+retrieveClickData();
+function retrieveClickData() {
+  const query = getClicksPerHour('faq_page');
+  client.query(query, (err, res) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(res);
+    }
   });
-  return query;
 }
 
 function getClicksPerHour(page) {
