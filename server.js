@@ -62,7 +62,10 @@ function retrieveClickData(page, resp) {
     if (err) {
       console.log(err);
     } else {
-      resp.send(getEventCounts(res));
+      resp.send({
+        times, 
+        counts: getEventCounts(res)
+      });
     }
   });
 }
@@ -80,7 +83,18 @@ function getEventCounts(result) {
     });
   });
   
-  return eventCounts;
+  let eventCountArray = [];
+  for (let key in eventCounts) {
+    if(eventCounts.hasOwnProperty(key)) {
+      eventCountArray.push({
+        event: key,
+        counts: eventCounts[key]
+      })
+    }
+  }
+
+
+  return eventCountArray;
 }
 
 function getDistinctEvents(result) {
