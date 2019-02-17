@@ -4,6 +4,8 @@ const http = require('http').Server(app);
 const { Client } = require('pg');
 const { CONNECTION_PARAMETERS } = require('./config/conf_db');
 
+const HOURS_TO_QUERY = 24;
+
 // set public directory
 app.use(express.static(__dirname));
 
@@ -60,12 +62,38 @@ function retrieveClickData(page, resp) {
     if (err) {
       console.log(err);
     } else {
-      times.forEach((time, index) => {
-        results.push({ time, results: res[index].rows });
-      });
-      resp.send(results);
+      resp.send(getEventCounts(res));
     }
   });
+}
+
+function getEventCounts(result) {
+  let eventCounts = {};
+  let distinctEvents = getDistinctEvents(result);
+  distinctEvents.forEach(event => {
+    eventCounts[event] = new Array(HOURS_TO_QUERY).fill(0,0);
+  });
+
+  result.forEach((res, index) => {
+    res.rows.forEach(eventCount => {
+      eventCounts[eventCount.event][index] = parseInt(eventCount.count);
+    });
+  });
+  
+  return eventCounts;
+}
+
+function getDistinctEvents(result) {
+  let events = [];
+  result.forEach(res => {
+    res.rows.forEach(eventCount => {
+      if (events.indexOf(eventCount.event) < 0) {
+        events.push(eventCount.event);
+      }
+    });
+  });
+
+  return events;
 }
 
 function getClicksPerHour(page) {
