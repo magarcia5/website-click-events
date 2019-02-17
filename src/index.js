@@ -4,40 +4,59 @@
 
 const { Chart } = require('chart.js');
 
+const GET_PAGES = 'http://localhost:3000/pages';
+const GET_CLICK_DATA = `http://localhost:3000/click-data?page=`;
+
  window.onload = function() {
-  fetch('http://localhost:3000/click-data?page=faq_page')
+  fetch(GET_PAGES)
   .then(response => response.json())
-  .then(data => drawCharts(data));
+  .then(pages => {
+    let urls = pages.map(page => GET_CLICK_DATA + page);
+    Promise.all(urls.map((url, index) => 
+      fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        drawChart(pages[index], data);
+      })
+    ));
+  });
  }
 
-function drawCharts(data) {
-  let canvas = document.createElement('canvas');
-  canvas.setAttribute('id', 'line-chart');
-  let el = document.getElementById('charts-container'); 
-  el.appendChild(canvas);
+function drawChart(page, data) {
+  let id = `${page}-line-chart`;
+  createChartEl(id);
 
-  const xAxis = data.times;
+  const labels = data.times.map(time => new Date(time).toLocaleTimeString());
   const datasets = data.counts.map(eventCount => {
     return { 
       label: eventCount.event,
       data: eventCount.counts,
-      borderColor: '#'+(Math.random()*0xFFFFFF<<0).toString(16),
+      borderColor: '#'+Math.floor(Math.random()*16777215).toString(16),
       fill: false
     };
   });
-  console.log(datasets);
 
-  new Chart(document.getElementById("line-chart"), {
+  new Chart(document.getElementById(id), {
     type: 'line',
-    data: {
-      labels: xAxis,
-      datasets
-    },
+    data: { labels, datasets },
     options: {
       title: {
         display: true,
-        text: 'Clicks per hour'
+        text: page
       }
     }
   });
+}
+
+function createChartEl(id) {
+  let container = document.createElement('div');
+  container.setAttribute('class', 'container');
+
+  let canvas = document.createElement('canvas');
+  canvas.setAttribute('id', id);
+
+  container.appendChild(canvas);
+
+  let el = document.getElementById('charts'); 
+  el.appendChild(container);
 }
