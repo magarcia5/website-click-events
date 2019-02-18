@@ -78,6 +78,13 @@ The client then needs to request the data and draw a line chart for each page wi
 
 6. Last was to make the requests on the client and draw the line charts. This involved querying `/pages` and using the data to query for each `/click-data?page=page_name` request. Once the data was returned, using Chart.js, I set the x-axis labels to the times, and the datasets to the count arrays.
 
+### Concerns
+
+There are a few issues I didn't address but could make interesting future projects:
+  * In the interest of time, I made event data strictly random and as such, the generated charts don't tell a very interesting story. A better solution would have been to generate more events in potential high-traffic time windows, like 9am-5pm.
+  * Sometimes the random colors generated for the lines don't contrast very well so the lines aren't as easy to tell apart. A better solution would be to identify more contrasting colors and to use those.
+  * The data in the db only updates on `npm run build`, so if you don't run that command for a while, all the events drop off as the selected time window moves past the window of generated results.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
