@@ -41,12 +41,6 @@ const DB_ERROR = 'The server is currently unable to handle this request. Please 
 
 const GET_PAGES_QUERY = 'SELECT DISTINCT page FROM test_table;';
 
-let NOW = new Date();
-NOW = new Date(NOW.setMinutes(00,00));
-
-let ONE_DAY_AGO = new Date(NOW).setDate(NOW.getDate() - 1);
-ONE_DAY_AGO = new Date(ONE_DAY_AGO);
-
 CLIENT.connect()
   .catch((err) => {
     console.error('connection error. please retry.', err.stack);
@@ -170,11 +164,17 @@ function getDistinctEvents(result) {
  * @returns object with list of times and db query
  */
 function getClicksPerHour(page) {
+  let now = new Date();
+  now = new Date(now.setMinutes(00,00));
+
+  let oneDayAgo = new Date(now).setDate(now.getDate() - 1);
+  oneDayAgo = new Date(oneDayAgo);
+
   let query = '';
-  let currTime = ONE_DAY_AGO;
+  let currTime = oneDayAgo;
   let times = [];
 
-  while (currTime < NOW) {
+  while (currTime < now) {
     let oneHourLater =  addHour(new Date(currTime));
 
     times.push(currTime);
