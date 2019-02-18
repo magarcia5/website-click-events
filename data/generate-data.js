@@ -1,9 +1,9 @@
 /**
- * This script generates click events and populates the local postgres
- * database. There must be postgres installed on the machine.
+ * This script generates click events and populates the postgres
+ * database with events from the last 24 hours
  * 
  * The clicks events are tracked by time, page, and event name
- *  i.e. {2019-02-14T23:24:47.524,home_page,faq_link}
+ *  i.e. { 2019-02-14 23:24:47, home_page, faq_link }
  * 
  */
 
@@ -42,20 +42,22 @@ client.connect((err) => {
   } 
 });
 
-const now = new Date();
-let oneDayAgo = new Date(now).setDate(now.getDate() - 1);
-oneDayAgo = new Date(oneDayAgo);
+const NOW = new Date();
+
+const oneDayAgoMilliseconds = new Date(NOW).setDate(NOW.getDate() - 1);
+const ONE_DAY_AGO = new Date(oneDayAgoMilliseconds);
 
 let q = `
   DROP TABLE test_table; 
   CREATE TABLE test_table (time timestamp not null, page text not null, event text not null); 
   INSERT INTO test_table (time, page, event) VALUES `;
 
+// create query to generate NUM_EVENTS_TO_GENERATE event occurences 
+// with random time for each event
 PAGE_EVENTS.forEach(page => {
-  const events = page.events;
-  events.forEach(event => {
+  page.events.forEach(event => {
     for(let i = 0; i < NUM_EVENTS_TO_GENERATE; i++) {
-      const date = randomDate(now, oneDayAgo, 0, 23);
+      const date = randomDate(NOW, ONE_DAY_AGO);
       q = q.concat(`(\'${date}\', \'${page.name}\', \'${event}\'),`);
     }
   });
@@ -64,15 +66,27 @@ PAGE_EVENTS.forEach(page => {
 q = q.slice(0,-1);
 q = q.concat(';');
 
-client.query(q, (err, res) => {
-  if (err) console.log(err);
-  console.log("Your data has been created.");
-  client.end()
-});
+client.query(q)
+  .then(() => {
+    console.log("Your data has been created.");
+    client.end()
+  })
+  .catch(err => {
+    console.log(err);
+    client.end();
+  });
 
-function randomDate(start, end, startHour, endHour) {
+
+/**
+ * Generate random date between start and end day with random hour
+ * 
+ * @param {Date} start start date
+ * @param {Date} end end date
+ * @returns date formatted for postgres db
+ */
+function randomDate(start, end) {
   var date = new Date(+start + Math.random() * (end - start));
-  var hour = startHour + Math.random() * (endHour - startHour) | 0;
+  var hour = Math.random() * 23 | 0;
   date.setHours(hour);
   
   // format for postgres db i.e. 2019-02-15 20:35:15
