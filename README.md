@@ -18,7 +18,7 @@ The client then needs to request the data and draw a line chart for each page wi
 
 1. I set up a Digital Ocean [managed PostgresSQL database](https://www.digitalocean.com/docs/databases/overview/).
 
-2. Next, I wrote a scipt to create a table and dynamically generate rows of data in the following format:
+2. Next, I wrote a scipt to create a table and dynamically generate rows of event data from an example set of pages and events I created. This data is stored in the following format:
 
 ```
 { '02-15-2019 16:45:23', 'home_page', 'button_click' } 
